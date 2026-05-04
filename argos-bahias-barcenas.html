@@ -1027,8 +1027,8 @@ const CONFIG = {
   REFRESH_MS: 30000,
 
   // Estados que se consideran "activos" para mostrar como tarjeta
-  STATUS_ACTIVOS: ["en_espera","cargando","enlonado","despachado",
-                   "carga_completa","en_problema","en_ruta","bahia_asignada","descargando"],
+  STATUS_ACTIVOS: ["en_espera","asignado","cargando","enlonado",
+                   "carga_completa","en_problema","bahia_asignada","descargando"],
 };
 
 /* ─── Utilidades CSV ───────────────────────────────────────── */
@@ -1114,6 +1114,7 @@ function fotoDelPiloto(fotos, piloto, placa) {
 function statusBadge(status) {
   const map = {
     "en_espera":      { label: "⏳ En espera",  cls: "warning",   color: "warn" },
+    "asignado":       { label: "▸ Asignado",    cls: "busy",      color: "busy" },
     "cargando":       { label: "▸ Cargando",    cls: "busy",      color: "busy" },
     "enlonado":       { label: "🪢 Enlonando",  cls: "busy",      color: "busy" },
     "carga_completa": { label: "✓ Completo",    cls: "busy",      color: "busy" },
@@ -1215,8 +1216,8 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
 
 function progresoFill(status) {
   const map = {
-    "en_espera": 15, "cargando": 50, "enlonado": 75,
-    "carga_completa": 90, "despachado": 100, "en_ruta": 100,
+    "en_espera": 15, "asignado": 25, "cargando": 50, "enlonado": 75,
+    "carga_completa": 90, "despachado": 100, "en_ruta": 100, "completado": 100,
     "bahia_asignada": 30, "descargando": 60, "en_problema": 50
   };
   return map[status] || 30;
@@ -1337,7 +1338,7 @@ function renderCola(turnosEnEspera) {
 
 function renderStats(turnosTodosHoy, turnosActivos, turnosEspera) {
   const despachados = turnosTodosHoy.filter(t =>
-    ["despachado","en_ruta"].includes(t.status)).length;
+    ["despachado","en_ruta","completado"].includes(t.status)).length;
   document.getElementById("stat-atendidos").textContent = despachados;
   document.getElementById("stat-espera").textContent = turnosEspera.length;
   document.getElementById("stat-proceso").textContent = turnosActivos.length;
@@ -1368,7 +1369,7 @@ function checkNuevoTurno(turnosActivos, fotosMap) {
   for (const t of turnosActivos) {
     const id = t.id || (t.turno_numero + "_" + t.piloto_nombre);
     if (turnosAnunciados.has(id)) continue;
-    if (!["cargando","bahia_asignada"].includes(t.status)) continue;
+    if (!["cargando","bahia_asignada","asignado"].includes(t.status)) continue;
 
     turnosAnunciados.add(id);
     saveAnnounced();
@@ -1436,7 +1437,7 @@ async function cargarDatos() {
     // Activos: status que no es "libre"/"despachado"/"en_ruta"
     const turnosActivos = turnosHoy
       .filter(t => CONFIG.STATUS_ACTIVOS.includes(t.status))
-      .filter(t => !["despachado","en_ruta"].includes(t.status))
+      .filter(t => !["despachado","en_ruta","completado"].includes(t.status))
       .sort((a, b) => (a.hora_llegada || "").localeCompare(b.hora_llegada || ""));
 
     // En proceso (caben en bahías) vs en cola (sobran)
