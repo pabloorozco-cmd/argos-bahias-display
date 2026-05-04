@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ARGOS · Sistema de Control de Despachos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --argos-navy: #0A1F44;
+    --argos-navy-deep: #061530;
+    --argos-navy-light: #15305F;
+    --argos-lime: #C8D400;
+    --argos-lime-bright: #DCE800;
+    --argos-white: #FFFFFF;
+    --argos-gold: #F5C842;
+    --argos-card-bg: rgba(21, 48, 95, 0.55);
+    --argos-card-border: rgba(200, 212, 0, 0.18);
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--argos-navy-deep);
+    font-family: 'Inter', sans-serif;
+    color: var(--argos-white);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 30%, rgba(200, 212, 0, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 70%, rgba(21, 48, 95, 0.6) 0%, transparent 60%),
+      linear-gradient(135deg, #061530 0%, #0A1F44 50%, #061530 100%);
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200, 212, 0, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 212, 0, 0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .logo-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .logo-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--argos-lime);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-circle::before {
+    content: '';
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--argos-navy-deep);
+  }
+
+  .logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: var(--argos-white);
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: var(--argos-lime);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .system-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--argos-white);
+    margin-bottom: 8px;
+  }
+
+  .system-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .accent-line {
+    width: 80px;
+    height: 4px;
+    background: var(--argos-lime);
+    margin: 20px auto 0;
+    border-radius: 2px;
+  }
+
+  /* ── Selección de bodega ── */
+  .selection-label {
+    text-align: center;
+    margin-bottom: 32px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .selection-label::before,
+  .selection-label::after {
+    content: '◆';
+    margin: 0 14px;
+    color: var(--argos-lime);
+    font-size: 8px;
+    vertical-align: middle;
+  }
+
+  .bodegas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .bodega-card {
+    background: var(--argos-card-bg);
+    border: 1px solid var(--argos-card-border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    text-decoration: none;
+    color: var(--argos-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+  }
+
+  .bodega-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--argos-lime), transparent);
+    opacity: 0.6;
+  }
+
+  .bodega-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--argos-lime);
+    box-shadow: 0 12px 40px rgba(200, 212, 0, 0.15);
+    background: rgba(21, 48, 95, 0.7);
+  }
+
+  .bodega-card:hover .bodega-icon {
+    background: var(--argos-lime);
+    color: var(--argos-navy-deep);
+    box-shadow: 0 0 24px rgba(200, 212, 0, 0.4);
+  }
+
+  .bodega-card:hover .bodega-cta {
+    color: var(--argos-lime-bright);
+  }
+
+  .bodega-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(200, 212, 0, 0.08);
+    border: 2px solid var(--argos-lime);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--argos-lime);
+    transition: all 0.3s ease;
+  }
+
+  .bodega-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--argos-white);
+    margin-bottom: 6px;
+  }
+
+  .bodega-info {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+  }
+
+  .bodega-bays-count {
+    display: inline-block;
+    background: rgba(200, 212, 0, 0.12);
+    border: 1px solid rgba(200, 212, 0, 0.3);
+    color: var(--argos-lime);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .bodega-cta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--argos-white);
+    transition: color 0.3s ease;
+  }
+
+  .bodega-cta::after {
+    content: ' →';
+    color: var(--argos-lime);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 60px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .footer-divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 auto 12px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .logo-text { font-size: 36px; letter-spacing: 4px; }
+    .system-title { font-size: 22px; letter-spacing: 3px; }
+    .bodegas-grid { grid-template-columns: 1fr; }
+    .bodega-card { padding: 28px 24px; }
+    .bodega-name { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="logo-mark">
+      <div class="logo-circle"></div>
+      <div>
+        <div class="logo-text">ARGOS</div>
+        <div class="logo-sub">Mortero</div>
+      </div>
+    </div>
+
+    <div class="system-title">Sistema de Control de Despachos</div>
+    <div class="system-subtitle">Pantallas de bahías · Tiempo real</div>
+    <div class="accent-line"></div>
+  </header>
+
+  <!-- ===== SELECCIÓN ===== -->
+  <div class="selection-label">Selecciona la bodega</div>
+
+  <div class="bodegas-grid">
+
+    <!-- ── MORALES ── -->
+    <a href="argos-bahias-morales.html" class="bodega-card">
+      <div class="bodega-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21h18M3 21V8l9-5 9 5v13M9 21V13h6v8M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01"/>
+        </svg>
+      </div>
+      <div class="bodega-name">Morales</div>
+      <div class="bodega-info">Planta principal</div>
+      <div class="bodega-bays-count">4 Bahías</div>
+      <div class="bodega-cta">Abrir pantalla</div>
+    </a>
+
+    <!-- ── BÁRCENAS ── -->
+    <a href="argos-bahias-barcenas.html" class="bodega-card">
+      <div class="bodega-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21h18M3 21V11l9-6 9 6v10M10 21v-6h4v6M9 11h.01M15 11h.01"/>
+        </svg>
+      </div>
+      <div class="bodega-name">Bárcenas</div>
+      <div class="bodega-info">Planta secundaria</div>
+      <div class="bodega-bays-count">1 Bahía</div>
+      <div class="bodega-cta">Abrir pantalla</div>
+    </a>
+
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-divider"></div>
+    Argos Cementos Guatemala · Despachos v3.0
+  </footer>
+
+</div>
+
+</body>
+</html>
