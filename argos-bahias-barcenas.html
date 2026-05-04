@@ -1448,16 +1448,17 @@ async function cargarDatos() {
     const fotosMap = new Map();
     fotos.forEach(f => {
       const key = `${(f.piloto_nombre||"").toLowerCase()}|${(f.piloto_placa||"").toLowerCase()}`;
+      const url = (f.foto_url || "").trim();
+      if (!url) return;
+      const fechaHora = (f.fecha || "") + (f.hora || "");
       const prev = fotosMap.get(key);
-      if (!prev || ((f.fecha+f.hora) > (prev._k || ""))) {
-        fotosMap.set(key, f.foto_url);
-        // Guardamos la key de orden en una propiedad oculta
-        Object.defineProperty(fotosMap.get(key), "_k", {value: f.fecha + f.hora});
+      if (!prev || fechaHora > prev.fechaHora) {
+        fotosMap.set(key, { url, fechaHora });
       }
     });
-    // Reconstruir mapa simple (URL → string)
+    // Convertir a mapa simple key → URL string
     const fotosFinales = new Map();
-    for (const [k, v] of fotosMap.entries()) fotosFinales.set(k, v);
+    for (const [k, v] of fotosMap.entries()) fotosFinales.set(k, v.url);
 
     const prefijo = bodNorm === "Morales" ? "MOR" : "BAR";
 
