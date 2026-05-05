@@ -880,7 +880,7 @@
       </div>
       <div class="logo-text">ARGOS</div>
       <div class="logo-sep"></div>
-      <div class="logo-sub">Mortero</div>
+      <div class="logo-sub">Guatemala</div>
     </div>
     
     <div class="header-center">
@@ -920,6 +920,19 @@
       <!-- NOW SERVING -->
       <div id="now-serving-container"></div>
 
+      <!-- VIDEO AREA -->
+      <div class="video-area">
+        <div class="video-corner-tag">VIDEO INSTITUCIONAL</div>
+        <div class="video-content">
+          <div class="video-placeholder">
+            <div class="video-play">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(200, 212, 0, 0.6)"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; letter-spacing: 5px; text-transform: uppercase;">Reproductor de video</div>
+            <div style="font-size: 13px; margin-top: 6px; letter-spacing: 2px;">Espacio para contenido institucional · Seguridad · Capacitación</div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- QUEUE COLUMN -->
@@ -1166,8 +1179,9 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
     const badge   = statusBadge(t.status);
     const fotoUrl = fotosMap.get(`${(t.piloto_nombre||"").toLowerCase()}|${(t.piloto_placa||"").toLowerCase()}`)
                  || fotosMap.get(`placa|${(t.piloto_placa||"").toLowerCase()}`);
+    const nombreSafe = (t.piloto_nombre||"").replace(/'/g,"&#39;");
     const fotoHtml = fotoUrl
-      ? `<img src="${fotoUrl}" alt="${t.piloto_nombre}" onerror="this.outerHTML='${avatarFallback(t.piloto_nombre).replace(/'/g, "\\'")}'">`
+      ? `<img src="${fotoUrl}" alt="${nombreSafe}" onerror="this.parentElement.innerHTML=avatarFallback('${nombreSafe}')">`
       : avatarFallback(t.piloto_nombre);
     const statusClass = "status-" + badge.color;
 
@@ -1190,7 +1204,7 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
           <div class="bay-driver-name">${t.piloto_nombre || "—"}</div>
         </div>
         <div class="bay-progress">
-          <div class="bay-progress-bar"><div class="bay-progress-fill" style="width: ${progresoFill(t.status)}%"></div></div>
+          <div class="bay-progress-bar"><div class="bay-progress-fill" style="width: ${progresoFill(t.status, t.hora_llegada)}%"></div></div>
           <div class="bay-progress-meta">
             <span>🚗 ${t.piloto_placa || "—"}</span>
             <span class="time-left">▸ ${t.hora_llegada || ""}</span>
@@ -1202,13 +1216,29 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
   container.innerHTML = html.join("");
 }
 
-function progresoFill(status) {
+function progresoFill(status, horaLlegada) {
+  // Si está despachado/completado → 100%
+  if (["despachado","en_ruta","completado"].includes(status)) return 100;
+  // Calcular por tiempo transcurrido desde hora_llegada (promedio 45 min)
+  if (horaLlegada) {
+    try {
+      const [hh, mm] = horaLlegada.split(":").map(Number);
+      const ahora = new Date();
+      const llegada = new Date();
+      llegada.setHours(hh, mm, 0, 0);
+      // Si la hora de llegada es "futura" (pasó medianoche) ajustar
+      if (llegada > ahora) llegada.setDate(llegada.getDate() - 1);
+      const minutos = (ahora - llegada) / 60000;
+      const pct = Math.min(Math.round((minutos / 45) * 100), 95);
+      return Math.max(pct, 5);
+    } catch(e) {}
+  }
+  // Fallback por status
   const map = {
-    "en_espera": 15, "asignado": 25, "cargando": 50, "enlonado": 75,
-    "carga_completa": 90, "despachado": 100, "en_ruta": 100, "completado": 100,
-    "bahia_asignada": 30, "descargando": 60, "en_problema": 50
+    "en_espera": 10, "asignado": 25, "bahia_asignada": 30,
+    "cargando": 55, "enlonado": 75, "carga_completa": 90, "en_problema": 50
   };
-  return map[status] || 30;
+  return map[status] || 15;
 }
 
 /* ─── Render: piloto siendo atendido (centro) ──────────────── */
@@ -1279,19 +1309,6 @@ function renderNowServing(turnosActivos, fotosMap) {
         <div class="label">Turno</div>
         <div class="number">${cargando.turno_numero || "?"}</div>
         <div class="bay-tag-big">▸ ${CONFIG.BODEGA}</div>
-      </div>
-    </div>
-    <!-- VIDEO AREA -->
-    <div class="video-area">
-      <div class="video-corner-tag">VIDEO INSTITUCIONAL</div>
-      <div class="video-content">
-        <div class="video-placeholder">
-          <div class="video-play">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(200, 212, 0, 0.6)"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; letter-spacing: 5px; text-transform: uppercase;">Reproductor de video</div>
-          <div style="font-size: 13px; margin-top: 6px; letter-spacing: 2px;">Espacio para contenido institucional · Seguridad · Capacitación</div>
-        </div>
       </div>
     </div>`;
 }
@@ -1442,16 +1459,13 @@ async function cargarDatos() {
       const nombre = (f.piloto_nombre || "").trim().toLowerCase();
       const placa  = (f.piloto_placa  || "").trim().toLowerCase();
       const fechaHora = (f.fecha || "") + (f.hora || "");
-      // Guardar por nombre+placa
       const key1 = `${nombre}|${placa}`;
       const prev1 = fotosMap.get(key1);
       if (!prev1 || fechaHora > prev1.fechaHora) fotosMap.set(key1, { url, fechaHora });
-      // Guardar también solo por placa (fallback)
       const key2 = `placa|${placa}`;
       const prev2 = fotosMap.get(key2);
       if (!prev2 || fechaHora > prev2.fechaHora) fotosMap.set(key2, { url, fechaHora });
     });
-    // Convertir a mapa simple key → URL string
     const fotosFinales = new Map();
     for (const [k, v] of fotosMap.entries()) fotosFinales.set(k, v.url);
 
