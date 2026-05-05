@@ -920,19 +920,6 @@
       <!-- NOW SERVING -->
       <div id="now-serving-container"></div>
 
-      <!-- VIDEO AREA -->
-      <div class="video-area">
-        <div class="video-corner-tag">VIDEO INSTITUCIONAL</div>
-        <div class="video-content">
-          <div class="video-placeholder">
-            <div class="video-play">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(200, 212, 0, 0.6)"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-            <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; letter-spacing: 5px; text-transform: uppercase;">Reproductor de video</div>
-            <div style="font-size: 13px; margin-top: 6px; letter-spacing: 2px;">Espacio para contenido institucional · Seguridad · Capacitación</div>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- QUEUE COLUMN -->
@@ -1177,7 +1164,8 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
 
     // Bahía ocupada
     const badge   = statusBadge(t.status);
-    const fotoUrl = fotosMap.get(`${(t.piloto_nombre||"").toLowerCase()}|${(t.piloto_placa||"").toLowerCase()}`);
+    const fotoUrl = fotosMap.get(`${(t.piloto_nombre||"").toLowerCase()}|${(t.piloto_placa||"").toLowerCase()}`)
+                 || fotosMap.get(`placa|${(t.piloto_placa||"").toLowerCase()}`);
     const fotoHtml = fotoUrl
       ? `<img src="${fotoUrl}" alt="${t.piloto_nombre}" onerror="this.outerHTML='${avatarFallback(t.piloto_nombre).replace(/'/g, "\\'")}'">`
       : avatarFallback(t.piloto_nombre);
@@ -1251,7 +1239,8 @@ function renderNowServing(turnosActivos, fotosMap) {
     return;
   }
 
-  const fotoUrl = fotosMap.get(`${(cargando.piloto_nombre||"").toLowerCase()}|${(cargando.piloto_placa||"").toLowerCase()}`);
+  const fotoUrl = fotosMap.get(`${(cargando.piloto_nombre||"").toLowerCase()}|${(cargando.piloto_placa||"").toLowerCase()}`)
+               || fotosMap.get(`placa|${(cargando.piloto_placa||"").toLowerCase()}`);
   const fotoHtml = fotoUrl
     ? `<img src="${fotoUrl}" alt="${cargando.piloto_nombre}">`
     : avatarFallback(cargando.piloto_nombre);
@@ -1379,7 +1368,8 @@ function checkNuevoTurno(turnosActivos, fotosMap) {
 }
 
 function mostrarAlerta(turno, fotosMap) {
-  const fotoUrl = fotosMap.get(`${(turno.piloto_nombre||"").toLowerCase()}|${(turno.piloto_placa||"").toLowerCase()}`);
+  const fotoUrl = fotosMap.get(`${(turno.piloto_nombre||"").toLowerCase()}|${(turno.piloto_placa||"").toLowerCase()}`)
+               || fotosMap.get(`placa|${(turno.piloto_placa||"").toLowerCase()}`);
   const fotoHtml = fotoUrl
     ? `<img src="${fotoUrl}" alt="${turno.piloto_nombre}">`
     : avatarFallback(turno.piloto_nombre);
@@ -1444,17 +1434,22 @@ async function cargarDatos() {
     const enProceso = turnosActivos.slice(0, CONFIG.NUM_BAHIAS);
     const enCola    = turnosActivos.slice(CONFIG.NUM_BAHIAS);
 
-    // Mapa de fotos: key="nombre|placa" → última URL
+    // Mapa de fotos: key="nombre|placa" y "placa" → última URL
     const fotosMap = new Map();
     fotos.forEach(f => {
-      const key = `${(f.piloto_nombre||"").toLowerCase()}|${(f.piloto_placa||"").toLowerCase()}`;
       const url = (f.foto_url || "").trim();
       if (!url) return;
+      const nombre = (f.piloto_nombre || "").trim().toLowerCase();
+      const placa  = (f.piloto_placa  || "").trim().toLowerCase();
       const fechaHora = (f.fecha || "") + (f.hora || "");
-      const prev = fotosMap.get(key);
-      if (!prev || fechaHora > prev.fechaHora) {
-        fotosMap.set(key, { url, fechaHora });
-      }
+      // Guardar por nombre+placa
+      const key1 = `${nombre}|${placa}`;
+      const prev1 = fotosMap.get(key1);
+      if (!prev1 || fechaHora > prev1.fechaHora) fotosMap.set(key1, { url, fechaHora });
+      // Guardar también solo por placa (fallback)
+      const key2 = `placa|${placa}`;
+      const prev2 = fotosMap.get(key2);
+      if (!prev2 || fechaHora > prev2.fechaHora) fotosMap.set(key2, { url, fechaHora });
     });
     // Convertir a mapa simple key → URL string
     const fotosFinales = new Map();
