@@ -923,7 +923,7 @@
       <!-- VIDEO AREA -->
       <div class="video-area">
         <div class="video-corner-tag">VIDEO INSTITUCIONAL</div>
-        <iframe
+        <iframe id="yt-player"
           src="https://www.youtube.com/embed/-klqBljKMQw?autoplay=1&mute=1&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&showinfo=0"
           style="position:absolute;inset:0;width:100%;height:100%;border:none;z-index:1;"
           allow="autoplay; encrypted-media"
@@ -1201,7 +1201,7 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
           <div class="bay-driver-name">${t.piloto_nombre || "—"}</div>
         </div>
         <div class="bay-progress">
-          <div class="bay-progress-bar"><div class="bay-progress-fill" style="width: ${progresoFill(t.status, t.hora_llegada)}%"></div></div>
+          ${(() => { const pi = progresoInfo(t.status, t.hora_llegada); return `<div class="bay-progress-bar"><div class="bay-progress-fill" style="width:${pi.pct}%;background:${pi.color};box-shadow:0 0 10px ${pi.color}88;"></div></div>`; })()}
           <div class="bay-progress-meta">
             <span>🚗 ${t.piloto_placa || "—"}</span>
             <span class="time-left">▸ ${t.hora_llegada || ""}</span>
@@ -1213,8 +1213,9 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
   container.innerHTML = html.join("");
 }
 
-function progresoFill(status, horaLlegada) {
-  if (["despachado","en_ruta","completado"].includes(status)) return 100;
+function progresoInfo(status, horaLlegada) {
+  // Retorna { pct, color } para la barra de progreso
+  if (["despachado","en_ruta","completado"].includes(status)) return { pct: 100, color: "#2EB872" };
   if (horaLlegada) {
     try {
       const [hh, mm] = horaLlegada.split(":").map(Number);
@@ -1223,15 +1224,16 @@ function progresoFill(status, horaLlegada) {
       llegada.setHours(hh, mm, 0, 0);
       if (llegada > ahora) llegada.setDate(llegada.getDate() - 1);
       const minutos = (ahora - llegada) / 60000;
-      const pct = Math.min(Math.round((minutos / 45) * 100), 95);
-      return Math.max(pct, 5);
+      const pct = Math.min(Math.round((minutos / 45) * 100), 100);
+      const color = minutos > 45 ? "#E63946" : "#2EB872";
+      return { pct: Math.max(pct, 5), color };
     } catch(e) {}
   }
   const map = {
     "en_espera": 10, "asignado": 25, "bahia_asignada": 30,
     "cargando": 55, "enlonado": 75, "carga_completa": 90, "en_problema": 50
   };
-  return map[status] || 15;
+  return { pct: map[status] || 15, color: "#2EB872" };
 }
 
 /* ─── Render: piloto siendo atendido (centro) ──────────────── */
@@ -1303,19 +1305,6 @@ function renderNowServing(turnosActivos, fotosMap) {
         <div class="number">${cargando.turno_numero || "?"}</div>
         <div class="bay-tag-big">▸ ${CONFIG.BODEGA}</div>
       </div>
-    </div>
-    <!-- VIDEO AREA -->
-    <div class="video-area">
-      <div class="video-corner-tag">VIDEO INSTITUCIONAL</div>
-      <div class="video-content">
-        <div class="video-placeholder">
-          <div class="video-play">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(200, 212, 0, 0.6)"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; letter-spacing: 5px; text-transform: uppercase;">Reproductor de video</div>
-          <div style="font-size: 13px; margin-top: 6px; letter-spacing: 2px;">Espacio para contenido institucional · Seguridad · Capacitación</div>
-        </div>
-      </div>
     </div>`;
 }
 
@@ -1358,39 +1347,83 @@ function renderStats(turnosTodosHoy, turnosActivos, turnosEspera) {
     `${Math.min(turnosActivos.length, CONFIG.NUM_BAHIAS)}/${CONFIG.NUM_BAHIAS}`;
 }
 
-/* ─── Alerta de turno recién asignado (con voz) ────────────── */
+/* ════════════════════════════════════════════════════════════════
+   SISTEMA DE VOZ — 2 voces, 3 tipos de anuncio
+   ════════════════════════════════════════════════════════════════ */
 
-let turnosAnunciados = new Set();
-function loadAnnounced() {
-  try {
-    const raw = sessionStorage.getItem("turnos_anunciados_" + CONFIG.BODEGA);
-    if (raw) turnosAnunciados = new Set(JSON.parse(raw));
-  } catch(e) {}
-}
-function saveAnnounced() {
-  try {
-    sessionStorage.setItem("turnos_anunciados_" + CONFIG.BODEGA,
-      JSON.stringify([...turnosAnunciados]));
-  } catch(e) {}
-}
-loadAnnounced();
+let voiceFem = null;  // voz A: anuncios de asignación a bahía
+let voiceAlt = null;  // voz B: aviso previo + retrasos
 
-function checkNuevoTurno(turnosActivos, fotosMap) {
-  // Buscar el primer turno con status "cargando" o recién asignado
-  // que no se haya anunciado todavía en esta sesión
-  for (const t of turnosActivos) {
-    const id = t.id || (t.turno_numero + "_" + t.piloto_nombre);
-    if (turnosAnunciados.has(id)) continue;
-    if (!["cargando","bahia_asignada","asignado"].includes(t.status)) continue;
-
-    turnosAnunciados.add(id);
-    saveAnnounced();
-    mostrarAlerta(t, fotosMap);
-    break; // Una alerta a la vez
+function selectVoices() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  const femPriorities = [
+    v => v.lang === 'es-CO' && /female|mujer|helena|esperanza/i.test(v.name),
+    v => v.lang === 'es-CO',
+    v => v.lang === 'es-MX' && /female|mujer|paulina|esperanza|sabina/i.test(v.name),
+    v => v.lang === 'es-US' && /female|mujer|monica|penelope/i.test(v.name),
+    v => v.lang.startsWith('es') && /female|mujer/i.test(v.name),
+    v => v.lang === 'es-MX',
+    v => v.lang === 'es-US',
+    v => v.lang.startsWith('es'),
+  ];
+  for (const test of femPriorities) {
+    const found = voices.find(test);
+    if (found) { voiceFem = found; break; }
   }
+  // Segunda voz: distinta si hay otra disponible
+  const alts = voices.filter(v => v.lang.startsWith('es') && v !== voiceFem);
+  voiceAlt = alts[0] || voiceFem;
+}
+if ('speechSynthesis' in window) {
+  selectVoices();
+  window.speechSynthesis.onvoiceschanged = selectVoices;
 }
 
-function mostrarAlerta(turno, fotosMap) {
+function speak(text, voice, rate = 0.90, pitch = 1.05) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice  = voice || voiceFem;
+  u.lang   = (voice || voiceFem)?.lang || 'es-CO';
+  u.rate   = rate;
+  u.pitch  = pitch;
+  u.volume = 1;
+  window.speechSynthesis.speak(u);
+}
+
+/* ─── Persistencia de anuncios ya emitidos ──────────────────── */
+const _SK_A = "anun_asignado_" + CONFIG.BODEGA;
+const _SK_B = "anun_previo_"   + CONFIG.BODEGA;
+const _SK_C = "anun_retraso_"  + CONFIG.BODEGA;
+
+function _loadSet(k) {
+  try { const r = sessionStorage.getItem(k); return r ? new Set(JSON.parse(r)) : new Set(); }
+  catch(e) { return new Set(); }
+}
+function _saveSet(k, s) {
+  try { sessionStorage.setItem(k, JSON.stringify([...s])); } catch(e) {}
+}
+
+let anunAsignado = _loadSet(_SK_A);
+let anunPrevio   = _loadSet(_SK_B);
+let anunRetraso  = _loadSet(_SK_C);
+
+/* ─── Helper: minutos transcurridos desde hora HH:MM:SS ─────── */
+function minutosDesde(horaStr) {
+  if (!horaStr) return -1;
+  try {
+    const [hh, mm] = horaStr.split(":").map(Number);
+    const ahora   = new Date();
+    const llegada = new Date();
+    llegada.setHours(hh, mm, 0, 0);
+    if (llegada > ahora) llegada.setDate(llegada.getDate() - 1);
+    return Math.floor((ahora - llegada) / 60000);
+  } catch(e) { return -1; }
+}
+
+/* ─── Alerta visual full-screen ─────────────────────────────── */
+function mostrarAlertaBahia(turno, bahiaId, turnoNum, fotosMap) {
   const fotoUrl = fotosMap.get(`${(turno.piloto_nombre||"").toLowerCase()}|${(turno.piloto_placa||"").toLowerCase()}`)
                || fotosMap.get(`placa|${(turno.piloto_placa||"").toLowerCase()}`);
   const fotoHtml = fotoUrl
@@ -1399,26 +1432,83 @@ function mostrarAlerta(turno, fotosMap) {
 
   document.getElementById("alert-content").innerHTML = `
     <div class="alert-photo">${fotoHtml}</div>
-    <div class="alert-label">▸ Atención ◂</div>
-    <div class="alert-title">Su turno</div>
-    <div class="alert-driver-name">${turno.piloto_nombre}</div>
-    <div class="alert-turn">T-${turno.turno_numero}</div>
-    <div class="alert-bay-target">Diríjase a la bodega <strong>${CONFIG.BODEGA}</strong></div>
+    <div class="alert-label">▸ Turno Asignado ◂</div>
+    <div class="alert-driver-name">${turno.piloto_nombre || "—"}</div>
+    <div class="alert-turn">T-${turnoNum}</div>
+    <div class="alert-bay-target">Por favor diríjase a <strong>${bahiaId}</strong></div>
   `;
   document.getElementById("alert").classList.add("show");
-
-  // Anunciar por voz
-  const tn = turno.turno_numero || "?";
-  speak(`Atención. Turno ${tn}. ${turno.piloto_nombre}, por favor diríjase a la bodega ${CONFIG.BODEGA}. Repito, turno ${tn}, prepárese para ingresar.`);
-
-  // Ocultar después de 8 segundos
-  setTimeout(() => {
-    document.getElementById("alert").classList.remove("show");
-  }, 8000);
+  setTimeout(() => document.getElementById("alert").classList.remove("show"), 9000);
 }
 
-/* ─── Live status indicator ────────────────────────────────── */
+/* ─── checkAnuncios: lógica de los 3 tipos ──────────────────── */
+function checkAnuncios(enProceso, enCola, fotosMap, prefijo) {
+  const STATUS_CARGA = ["cargando","enlonado","carga_completa"];
 
+  /* TIPO A — asignación a bahía */
+  for (let i = 0; i < enProceso.length; i++) {
+    const t  = enProceso[i];
+    if (!["asignado","bahia_asignada","cargando"].includes(t.status)) continue;
+    const id = t.id || `${t.turno_numero}_${t.piloto_nombre}`;
+    if (anunAsignado.has(id)) continue;
+
+    anunAsignado.add(id); _saveSet(_SK_A, anunAsignado);
+
+    const bahiaId = `${prefijo}${String(i+1).padStart(2,"0")}`;
+    const nombre  = t.piloto_nombre || "piloto";
+    const placa   = t.piloto_placa  || "";
+    const tn      = t.turno_numero  || "";
+
+    mostrarAlertaBahia(t, bahiaId, tn, fotosMap);
+    setTimeout(() => speak(
+      `Turno ${tn}. ${nombre}, placa ${placa}, ` +
+      `por favor diríjase a Bahía ${bahiaId}. ` +
+      `Repito, Turno ${tn}, ${nombre}, Bahía ${bahiaId}.`,
+      voiceFem
+    ), 600);
+    break;
+  }
+
+  /* TIPO B y C — basados en el primer piloto activo en carga */
+  const pilotoEnCarga = enProceso.find(t => STATUS_CARGA.includes(t.status));
+  if (!pilotoEnCarga) return;
+
+  const mins = minutosDesde(pilotoEnCarga.hora_llegada);
+  if (mins < 0) return;
+  const id   = pilotoEnCarga.id || `${pilotoEnCarga.turno_numero}_${pilotoEnCarga.piloto_nombre}`;
+  const idxP = enProceso.indexOf(pilotoEnCarga);
+  const bahiaId = `${prefijo}${String(idxP+1).padStart(2,"0")}`;
+
+  /* TIPO B — aviso 5 min antes (40–44 min) */
+  if (mins >= 40 && mins < 45 && !anunPrevio.has(id)) {
+    const siguiente = enCola[0] || enProceso.find(t => t !== pilotoEnCarga);
+    if (siguiente) {
+      anunPrevio.add(id); _saveSet(_SK_B, anunPrevio);
+      const nom = siguiente.piloto_nombre || "siguiente piloto";
+      const plc = siguiente.piloto_placa  || "";
+      setTimeout(() => speak(
+        `${nom}, placa ${plc}, prepárese. Será atendido en breve.`,
+        voiceAlt, 0.88, 1.08
+      ), 800);
+    }
+  }
+
+  /* TIPO C — retraso: cada 5 min a partir de los 45 */
+  if (mins >= 45) {
+    const intervalo = Math.floor(mins / 5) * 5;
+    const keyC = `${id}_${intervalo}`;
+    if (!anunRetraso.has(keyC)) {
+      anunRetraso.add(keyC); _saveSet(_SK_C, anunRetraso);
+      setTimeout(() => speak(
+        `Atención. El piloto en Bahía ${bahiaId} lleva ${mins} minutos en proceso. ` +
+        `Agradecemos la comprensión y paciencia de los demás pilotos.`,
+        voiceFem, 0.88
+      ), 1000);
+    }
+  }
+}
+
+/* ─── Live status indicator ─────────────────────────────────── */
 function setLiveStatus(ok, msg) {
   const dot = document.getElementById("live-dot");
   const txt = document.getElementById("live-text");
@@ -1431,8 +1521,7 @@ function setLiveStatus(ok, msg) {
   }
 }
 
-/* ─── Loop principal ───────────────────────────────────────── */
-
+/* ─── Loop principal ─────────────────────────────────────────── */
 async function cargarDatos() {
   try {
     const [turnos, fotos] = await Promise.all([
@@ -1440,48 +1529,42 @@ async function cargarDatos() {
       fetchCSV(CONFIG.CSV_FOTOS_PILOTOS),
     ]);
 
-    const hoy = todayStr();
+    const hoy     = todayStr();
     const bodNorm = normalizeBodega(CONFIG.BODEGA);
+    const prefijo = bodNorm === "Morales" ? "MOR" : "BAR";
 
-    // Filtrar turnos de la bodega y del día actual
     const turnosHoy = turnos.filter(t =>
       t.fecha === hoy && normalizeBodega(t.bodega) === bodNorm);
 
-    // Activos: status que no es "libre"/"despachado"/"en_ruta"
     const turnosActivos = turnosHoy
       .filter(t => CONFIG.STATUS_ACTIVOS.includes(t.status))
       .filter(t => !["despachado","en_ruta","completado"].includes(t.status))
       .sort((a, b) => (a.hora_llegada || "").localeCompare(b.hora_llegada || ""));
 
-    // En proceso (caben en bahías) vs en cola (sobran)
     const enProceso = turnosActivos.slice(0, CONFIG.NUM_BAHIAS);
     const enCola    = turnosActivos.slice(CONFIG.NUM_BAHIAS);
 
-    // Mapa de fotos: key="nombre|placa" y "placa" → última URL
-    const fotosMap = new Map();
+    // Mapa de fotos con fallback por placa
+    const _fm = new Map();
     fotos.forEach(f => {
-      const url = (f.foto_url || "").trim();
+      const url  = (f.foto_url || "").trim();
       if (!url) return;
-      const nombre = (f.piloto_nombre || "").trim().toLowerCase();
-      const placa  = (f.piloto_placa  || "").trim().toLowerCase();
-      const fechaHora = (f.fecha || "") + (f.hora || "");
-      const key1 = `${nombre}|${placa}`;
-      const prev1 = fotosMap.get(key1);
-      if (!prev1 || fechaHora > prev1.fechaHora) fotosMap.set(key1, { url, fechaHora });
-      const key2 = `placa|${placa}`;
-      const prev2 = fotosMap.get(key2);
-      if (!prev2 || fechaHora > prev2.fechaHora) fotosMap.set(key2, { url, fechaHora });
+      const nom  = (f.piloto_nombre || "").trim().toLowerCase();
+      const plc  = (f.piloto_placa  || "").trim().toLowerCase();
+      const fh   = (f.fecha || "") + (f.hora || "");
+      const k1   = `${nom}|${plc}`;
+      const k2   = `placa|${plc}`;
+      if (!_fm.get(k1) || fh > _fm.get(k1).fh) _fm.set(k1, { url, fh });
+      if (!_fm.get(k2) || fh > _fm.get(k2).fh) _fm.set(k2, { url, fh });
     });
     const fotosFinales = new Map();
-    for (const [k, v] of fotosMap.entries()) fotosFinales.set(k, v.url);
-
-    const prefijo = bodNorm === "Morales" ? "MOR" : "BAR";
+    for (const [k, v] of _fm.entries()) fotosFinales.set(k, v.url);
 
     renderBahias(enProceso, fotosFinales, prefijo);
     renderNowServing(enProceso, fotosFinales);
     renderCola(enCola);
     renderStats(turnosHoy, enProceso, enCola);
-    checkNuevoTurno(enProceso, fotosFinales);
+    checkAnuncios(enProceso, enCola, fotosFinales, prefijo);
 
     setLiveStatus(true);
   } catch (err) {
@@ -1490,69 +1573,29 @@ async function cargarDatos() {
   }
 }
 
-/* ─── Header dinámico ──────────────────────────────────────── */
+/* ─── Reloj ──────────────────────────────────────────────────── */
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock, 1000);
+updateClock();
 
+/* ─── Header dinámico ────────────────────────────────────────── */
 function setupHeader() {
-  document.getElementById("header-title").textContent =
-    "Control de Bahías · " + CONFIG.BODEGA;
-  document.getElementById("bays-title").textContent = "Bahías · " + CONFIG.BODEGA;
-
-  // Actualizar fecha
+  document.getElementById("header-title").textContent = "Control de Bahías · " + CONFIG.BODEGA;
+  document.getElementById("bays-title").textContent   = "Bahías · " + CONFIG.BODEGA;
   const d = new Date();
-  const dias = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+  const dias  = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
   const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
   document.getElementById("date").textContent =
     `${dias[d.getDay()]} · ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-/* ─── Reloj y voz (mantenidos del original) ────────────────── */
-
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clock').textContent = h+':'+m+':'+s;
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-let preferredVoice = null;
-function selectVoice() {
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices.length) return;
-  const priorities = [
-    v => v.lang === 'es-MX' && /female|mujer|paulina|esperanza|sabina|angelica/i.test(v.name),
-    v => v.lang === 'es-US' && /female|mujer|paulina|monica|penelope/i.test(v.name),
-    v => /es-GT|es-CO|es-419/i.test(v.lang) && /female|mujer/i.test(v.name),
-    v => v.lang === 'es-MX',
-    v => v.lang === 'es-US',
-    v => v.lang === 'es-419',
-    v => v.lang.startsWith('es-') && /female|mujer|paulina|monica|esperanza|helena|laura/i.test(v.name),
-    v => v.lang.startsWith('es')
-  ];
-  for (const test of priorities) {
-    const found = voices.find(test);
-    if (found) { preferredVoice = found; break; }
-  }
-}
-if ('speechSynthesis' in window) {
-  selectVoice();
-  window.speechSynthesis.onvoiceschanged = selectVoice;
-}
-function speak(text) {
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  if (preferredVoice) u.voice = preferredVoice;
-  u.lang = 'es-MX';
-  u.rate = 0.92;
-  u.pitch = 1.05;
-  u.volume = 1;
-  window.speechSynthesis.speak(u);
-}
-
-/* ─── Arranque ─────────────────────────────────────────────── */
+/* ─── Arranque ───────────────────────────────────────────────── */
 setupHeader();
 cargarDatos();
 setInterval(cargarDatos, CONFIG.REFRESH_MS);
