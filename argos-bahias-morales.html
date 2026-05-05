@@ -845,21 +845,40 @@
     margin-left: 8px;
   }
 
-  .demo-btn {
+  /* ── Botón activar audio ── */
+  #btn-activar-audio {
     position: fixed;
-    bottom: 90px; right: 28px;
-    z-index: 200;
+    inset: 0;
+    z-index: 999;
+    background: rgba(6,21,48,0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    backdrop-filter: blur(6px);
+  }
+  #btn-activar-audio button {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    padding: 22px 56px;
     background: var(--argos-lime);
     color: var(--argos-navy-deep);
     border: none;
-    padding: 12px 18px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    letter-spacing: 2px;
-    font-size: 13px;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    box-shadow: 0 0 40px rgba(200,212,0,0.5);
+    animation: pulse-soft 1.8s infinite;
+    text-transform: uppercase;
+  }
+  #btn-activar-audio p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
   }
 </style>
 </head>
@@ -926,8 +945,7 @@
         <iframe id="yt-player"
           src="https://www.youtube.com/embed/-klqBljKMQw?autoplay=1&mute=1&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&showinfo=0"
           style="position:absolute;inset:0;width:100%;height:100%;border:none;z-index:1;"
-          allow="autoplay; encrypted-media"
-          allowfullscreen>
+          allow="autoplay; encrypted-media" allowfullscreen>
         </iframe>
       </div>
     </section>
@@ -985,9 +1003,20 @@
 
 <!-- ===== FULL-SCREEN ALERT (se llena dinámicamente) ===== -->
 <div class="alert-overlay" id="alert">
-  <div class="alert-content" id="alert-content">
-    <!-- Contenido inyectado por JS cuando hay un nuevo turno asignado -->
+  <div class="alert-content" id="alert-content"></div>
+</div>
+
+<!-- ===== ACTIVAR AUDIO (se oculta tras primer clic) ===== -->
+<div id="btn-activar-audio">
+  <div class="alert-photo" style="width:100px;height:100px;border:4px solid var(--argos-lime);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(200,212,0,0.15);">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C8D400" stroke-width="2">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+    </svg>
   </div>
+  <button onclick="activarAudio()">▶ ACTIVAR SISTEMA DE AUDIO</button>
+  <p>Presione para habilitar los anuncios de voz</p>
 </div>
 
 <!-- Indicador de actualización en vivo -->
@@ -1201,7 +1230,7 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
           <div class="bay-driver-name">${t.piloto_nombre || "—"}</div>
         </div>
         <div class="bay-progress">
-          ${(() => { const pi = progresoInfo(t.status, t.hora_llegada); return `<div class="bay-progress-bar"><div class="bay-progress-fill" style="width:${pi.pct}%;background:${pi.color};box-shadow:0 0 10px ${pi.color}88;"></div></div>`; })()}
+          ${(()=>{ const pi=progresoInfo(t.status,t.hora_llegada); return `<div class="bay-progress-bar"><div class="bay-progress-fill" style="width:${pi.pct}%;background:${pi.color};box-shadow:0 0 10px ${pi.color}88;"></div></div>`; })()}
           <div class="bay-progress-meta">
             <span>🚗 ${t.piloto_placa || "—"}</span>
             <span class="time-left">▸ ${t.hora_llegada || ""}</span>
@@ -1214,25 +1243,23 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
 }
 
 function progresoInfo(status, horaLlegada) {
-  // Retorna { pct, color } para la barra de progreso
-  if (["despachado","en_ruta","completado"].includes(status)) return { pct: 100, color: "#2EB872" };
+  if (["despachado","en_ruta","completado"].includes(status)) return { pct:100, color:"#2EB872" };
   if (horaLlegada) {
     try {
-      const [hh, mm] = horaLlegada.split(":").map(Number);
-      const ahora = new Date();
+      const parts = horaLlegada.split(":");
+      const hh = Number(parts[0]), mm = Number(parts[1]);
+      const ahora   = new Date();
       const llegada = new Date();
       llegada.setHours(hh, mm, 0, 0);
       if (llegada > ahora) llegada.setDate(llegada.getDate() - 1);
-      const minutos = (ahora - llegada) / 60000;
-      const pct = Math.min(Math.round((minutos / 45) * 100), 100);
-      const color = minutos > 45 ? "#E63946" : "#2EB872";
+      const mins  = (ahora - llegada) / 60000;
+      const pct   = Math.min(Math.round((mins / 45) * 100), 100);
+      const color = mins > 45 ? "#E63946" : "#2EB872";
       return { pct: Math.max(pct, 5), color };
     } catch(e) {}
   }
-  const map = {
-    "en_espera": 10, "asignado": 25, "bahia_asignada": 30,
-    "cargando": 55, "enlonado": 75, "carga_completa": 90, "en_problema": 50
-  };
+  const map = { "en_espera":10,"asignado":25,"bahia_asignada":30,
+                "cargando":55,"enlonado":75,"carga_completa":90,"en_problema":50 };
   return { pct: map[status] || 15, color: "#2EB872" };
 }
 
@@ -1348,11 +1375,22 @@ function renderStats(turnosTodosHoy, turnosActivos, turnosEspera) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   SISTEMA DE VOZ — 2 voces, 3 tipos de anuncio
+   SISTEMA DE VOZ — activación por clic + 3 tipos de anuncio
    ════════════════════════════════════════════════════════════════ */
 
-let voiceFem = null;  // voz A: anuncios de asignación a bahía
-let voiceAlt = null;  // voz B: aviso previo + retrasos
+let audioActivado = false;
+let voiceFem = null;
+let voiceAlt = null;
+
+function activarAudio() {
+  // Desbloquear speechSynthesis con utterance silenciosa
+  const u = new SpeechSynthesisUtterance(" ");
+  u.volume = 0;
+  window.speechSynthesis.speak(u);
+  audioActivado = true;
+  document.getElementById("btn-activar-audio").style.display = "none";
+  selectVoices();
+}
 
 function selectVoices() {
   const voices = window.speechSynthesis.getVoices();
@@ -1371,7 +1409,6 @@ function selectVoices() {
     const found = voices.find(test);
     if (found) { voiceFem = found; break; }
   }
-  // Segunda voz: distinta si hay otra disponible
   const alts = voices.filter(v => v.lang.startsWith('es') && v !== voiceFem);
   voiceAlt = alts[0] || voiceFem;
 }
@@ -1381,7 +1418,7 @@ if ('speechSynthesis' in window) {
 }
 
 function speak(text, voice, rate = 0.90, pitch = 1.05) {
-  if (!('speechSynthesis' in window)) return;
+  if (!audioActivado || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.voice  = voice || voiceFem;
@@ -1409,11 +1446,12 @@ let anunAsignado = _loadSet(_SK_A);
 let anunPrevio   = _loadSet(_SK_B);
 let anunRetraso  = _loadSet(_SK_C);
 
-/* ─── Helper: minutos transcurridos desde hora HH:MM:SS ─────── */
+/* ─── Helper: minutos desde hora HH:MM o HH:MM:SS ──────────── */
 function minutosDesde(horaStr) {
   if (!horaStr) return -1;
   try {
-    const [hh, mm] = horaStr.split(":").map(Number);
+    const parts = horaStr.split(":");
+    const hh = Number(parts[0]), mm = Number(parts[1]);
     const ahora   = new Date();
     const llegada = new Date();
     llegada.setHours(hh, mm, 0, 0);
@@ -1441,13 +1479,13 @@ function mostrarAlertaBahia(turno, bahiaId, turnoNum, fotosMap) {
   setTimeout(() => document.getElementById("alert").classList.remove("show"), 9000);
 }
 
-/* ─── checkAnuncios: lógica de los 3 tipos ──────────────────── */
+/* ─── checkAnuncios — 3 tipos ───────────────────────────────── */
 function checkAnuncios(enProceso, enCola, fotosMap, prefijo) {
   const STATUS_CARGA = ["cargando","enlonado","carga_completa"];
 
-  /* TIPO A — asignación a bahía */
+  /* TIPO A — piloto asignado a bahía */
   for (let i = 0; i < enProceso.length; i++) {
-    const t  = enProceso[i];
+    const t = enProceso[i];
     if (!["asignado","bahia_asignada","cargando"].includes(t.status)) continue;
     const id = t.id || `${t.turno_numero}_${t.piloto_nombre}`;
     if (anunAsignado.has(id)) continue;
@@ -1469,7 +1507,7 @@ function checkAnuncios(enProceso, enCola, fotosMap, prefijo) {
     break;
   }
 
-  /* TIPO B y C — basados en el primer piloto activo en carga */
+  /* TIPO B y C — piloto activo en carga */
   const pilotoEnCarga = enProceso.find(t => STATUS_CARGA.includes(t.status));
   if (!pilotoEnCarga) return;
 
@@ -1479,7 +1517,7 @@ function checkAnuncios(enProceso, enCola, fotosMap, prefijo) {
   const idxP = enProceso.indexOf(pilotoEnCarga);
   const bahiaId = `${prefijo}${String(idxP+1).padStart(2,"0")}`;
 
-  /* TIPO B — aviso 5 min antes (40–44 min) */
+  /* TIPO B — aviso 5 min antes (min 40–44) */
   if (mins >= 40 && mins < 45 && !anunPrevio.has(id)) {
     const siguiente = enCola[0] || enProceso.find(t => t !== pilotoEnCarga);
     if (siguiente) {
@@ -1508,17 +1546,14 @@ function checkAnuncios(enProceso, enCola, fotosMap, prefijo) {
   }
 }
 
-/* ─── Live status indicator ─────────────────────────────────── */
+/* ─── Live status ────────────────────────────────────────────── */
 function setLiveStatus(ok, msg) {
   const dot = document.getElementById("live-dot");
   const txt = document.getElementById("live-text");
-  if (ok) {
-    dot.style.background = "#2EB872";
-    txt.textContent = msg || "actualizado " + new Date().toLocaleTimeString("es-GT");
-  } else {
-    dot.style.background = "#E63946";
-    txt.textContent = msg || "error de conexión";
-  }
+  dot.style.background = ok ? "#2EB872" : "#E63946";
+  txt.textContent = ok
+    ? (msg || "actualizado " + new Date().toLocaleTimeString("es-GT"))
+    : (msg || "error de conexión");
 }
 
 /* ─── Loop principal ─────────────────────────────────────────── */
@@ -1547,13 +1582,13 @@ async function cargarDatos() {
     // Mapa de fotos con fallback por placa
     const _fm = new Map();
     fotos.forEach(f => {
-      const url  = (f.foto_url || "").trim();
+      const url = (f.foto_url || "").trim();
       if (!url) return;
-      const nom  = (f.piloto_nombre || "").trim().toLowerCase();
-      const plc  = (f.piloto_placa  || "").trim().toLowerCase();
-      const fh   = (f.fecha || "") + (f.hora || "");
-      const k1   = `${nom}|${plc}`;
-      const k2   = `placa|${plc}`;
+      const nom = (f.piloto_nombre || "").trim().toLowerCase();
+      const plc = (f.piloto_placa  || "").trim().toLowerCase();
+      const fh  = (f.fecha || "") + (f.hora || "");
+      const k1  = `${nom}|${plc}`;
+      const k2  = `placa|${plc}`;
       if (!_fm.get(k1) || fh > _fm.get(k1).fh) _fm.set(k1, { url, fh });
       if (!_fm.get(k2) || fh > _fm.get(k2).fh) _fm.set(k2, { url, fh });
     });
