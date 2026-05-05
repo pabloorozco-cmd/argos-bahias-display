@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
 <title>ARGOS · Control de Bahías v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -861,6 +862,353 @@
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(0,0,0,0.4);
   }
+
+  /* ═══════════════════════════════════════════════════════
+     RESPONSIVE — TV · TABLET · SMARTPHONE
+     ═══════════════════════════════════════════════════════ */
+
+  /* ── Ultra-wide / 4K TV (>= 1800px) ─────────────────── */
+  @media screen and (min-width: 1800px) {
+    .header { grid-template-columns: 400px 1fr 480px; }
+    .logo-text { font-size: 42px; letter-spacing: 9px; }
+    .clock { font-size: 44px; }
+    .header-center .title { font-size: 34px; }
+    .main { padding: 28px 36px; gap: 28px; grid-template-columns: 500px 1fr 460px; }
+    .bay { padding: 20px 22px 20px 30px; }
+    .bay-id { font-size: 36px; }
+    .bay-turn-num { font-size: 32px; }
+    .bay-driver-name { font-size: 20px; }
+    .driver-name { font-size: 54px; }
+    .turn-badge .number { font-size: 78px; }
+    .queue-turn { font-size: 30px; }
+    .queue-name { font-size: 16px; }
+    .footer { padding: 0 40px; }
+    .stat-value { font-size: 30px; }
+    .ticker-content { font-size: 26px; }
+  }
+
+  /* ── Standard HD TV / Large monitor (1024px – 1799px) ── */
+  /* (estilos base ya optimizados para este rango) */
+  @media screen and (min-width: 1024px) and (max-width: 1399px) {
+    .main { grid-template-columns: 350px 1fr 320px; gap: 18px; padding: 18px 22px; }
+    .header { grid-template-columns: 280px 1fr 320px; padding: 0 28px; }
+    .logo-text { font-size: 28px; letter-spacing: 5px; }
+    .header-center .title { font-size: 22px; letter-spacing: 4px; }
+    .header-center .subtitle { font-size: 11px; letter-spacing: 5px; }
+    .clock { font-size: 28px; }
+    .bay { padding: 14px 16px 14px 22px; }
+    .bay-id { font-size: 26px; }
+    .bay-photo { width: 66px; height: 66px; }
+    .bay-turn-num { font-size: 22px; }
+    .bay-driver-name { font-size: 14px; }
+    .bay-progress-meta { font-size: 11px; }
+    .driver-name { font-size: 36px; }
+    .driver-photo { width: 120px; height: 120px; }
+    .turn-badge .number { font-size: 52px; }
+    .now-serving { padding: 20px 24px; gap: 18px; }
+    .queue-turn { font-size: 20px; }
+    .queue-name { font-size: 13px; }
+    .queue-position { width: 44px; height: 44px; font-size: 22px; }
+    .stat-value { font-size: 22px; }
+    .ticker-content { font-size: 19px; }
+    .footer { grid-template-columns: auto 1fr auto; gap: 20px; padding: 0 24px; }
+    .stats { gap: 20px; }
+    .stage { grid-template-rows: 70px 1fr 48px; }
+  }
+
+  /* ── Tablet landscape (768px – 1023px) ────────────────── */
+  @media screen and (max-width: 1023px) and (min-width: 768px) {
+    html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
+
+    .stage {
+      height: auto;
+      min-height: 100vh;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .header {
+      grid-template-columns: auto 1fr auto;
+      height: auto;
+      padding: 12px 20px;
+      gap: 12px;
+    }
+
+    .logo-text { font-size: 26px; letter-spacing: 5px; }
+    .logo-sub { font-size: 12px; letter-spacing: 3px; }
+    .logo-mark { width: 38px; height: 38px; }
+    .logo-sep { height: 22px; }
+    .header-center .title { font-size: 18px; letter-spacing: 3px; }
+    .header-center .subtitle { font-size: 10px; letter-spacing: 4px; }
+    .clock { font-size: 26px; }
+    .date { font-size: 11px; }
+    .live-pill { padding: 6px 10px; }
+    .live-pill span { font-size: 11px; }
+    .live-dot { width: 8px; height: 8px; }
+    .header-right { gap: 16px; }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 18px;
+      overflow: visible;
+    }
+
+    .bays-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .bays-col .col-header { grid-column: 1 / -1; }
+
+    .bay {
+      padding: 12px 14px 12px 20px;
+      grid-template-columns: 62px 1fr;
+    }
+
+    .bay-id { font-size: 22px; }
+    .bay-photo { width: 62px; height: 62px; }
+    .bay-turn-num { font-size: 20px; }
+    .bay-driver-name { font-size: 13px; }
+    .bay-status { font-size: 11px; padding: 4px 10px; }
+    .bay-progress-meta { font-size: 11px; }
+
+    .center-col {
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+    }
+
+    .now-serving {
+      flex: 1;
+      grid-template-columns: auto 1fr auto;
+      padding: 16px 20px;
+      gap: 14px;
+    }
+
+    .driver-photo { width: 110px; height: 110px; }
+    .driver-name { font-size: 32px; }
+    .turn-badge { padding: 10px 18px; }
+    .turn-badge .number { font-size: 48px; }
+    .turn-badge .label { font-size: 11px; letter-spacing: 4px; }
+    .turn-badge .bay-tag-big { font-size: 13px; }
+
+    .video-area { flex: 0 0 280px; min-height: 200px; }
+
+    .queue-col { flex-shrink: 0; width: 100%; }
+
+    .queue-item { padding: 10px 12px; gap: 10px; }
+    .queue-position { width: 44px; height: 44px; font-size: 22px; }
+    .queue-turn { font-size: 20px; }
+    .queue-name { font-size: 12px; }
+    .queue-eta { font-size: 11px; }
+    .queue-eta strong { font-size: 14px; }
+
+    .footer {
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      padding: 0 18px;
+      flex-wrap: wrap;
+    }
+    .system-status { display: none; }
+    .stats { gap: 14px; }
+    .stat-value { font-size: 20px; }
+    .stat-label { font-size: 10px; letter-spacing: 2px; }
+    .ticker-label { font-size: 16px; padding: 4px 10px; }
+    .ticker-content { font-size: 17px; }
+
+    .alert-title { font-size: 80px; }
+    .alert-turn { font-size: 64px; padding: 14px 36px; }
+    .alert-driver-name { font-size: 36px; }
+    .alert-photo { width: 140px; height: 140px; }
+
+    #btn-audio-voz { bottom: 52px; right: 12px; }
+    #live-status { bottom: 54px; }
+  }
+
+  /* ── Smartphone portrait (< 768px) ────────────────────── */
+  @media screen and (max-width: 767px) {
+    html, body {
+      height: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .stage {
+      height: auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─ Header móvil ─ */
+    .header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      height: auto;
+      padding: 10px 14px;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .header-center { display: none; }
+
+    .logo { gap: 10px; }
+    .logo-mark { width: 34px; height: 34px; }
+    .logo-text { font-size: 22px; letter-spacing: 4px; }
+    .logo-sub { font-size: 10px; letter-spacing: 3px; }
+    .logo-sep { height: 18px; }
+
+    .header-right { gap: 12px; }
+    .live-pill { padding: 5px 8px; gap: 6px; }
+    .live-pill span { font-size: 10px; letter-spacing: 1.5px; }
+    .live-dot { width: 7px; height: 7px; }
+    .clock { font-size: 22px; letter-spacing: 2px; }
+    .date { font-size: 10px; letter-spacing: 1.5px; }
+
+    /* ─ Main móvil ─ */
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px 12px;
+      overflow: visible;
+      flex: 1;
+    }
+
+    /* ─ Now Serving ─ */
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      order: -1; /* va primero en móvil */
+    }
+
+    .now-serving {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+
+    .driver-photo {
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 3px var(--argos-navy-deep), 0 0 0 5px var(--argos-lime), 0 0 20px rgba(200,212,0,0.4);
+    }
+
+    .driver-photo::after { inset: -10px; border-width: 1.5px; }
+
+    .driver-info { flex: 1; min-width: 0; }
+    .driver-label { font-size: 11px; letter-spacing: 4px; margin-bottom: 2px; }
+    .driver-name { font-size: 22px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .driver-meta { flex-wrap: wrap; gap: 8px; }
+    .driver-meta-item .icon { width: 26px; height: 26px; }
+    .driver-meta-item .text { font-size: 12px; }
+    .driver-meta-item .text small { font-size: 9px; }
+
+    .turn-badge { padding: 8px 14px; flex-shrink: 0; }
+    .turn-badge .label { font-size: 9px; letter-spacing: 3px; }
+    .turn-badge .number { font-size: 38px; }
+    .turn-badge .bay-tag-big { font-size: 11px; letter-spacing: 2.5px; }
+
+    /* Ocultar video en móvil */
+    .video-area { display: none; }
+
+    /* ─ Bahías ─ */
+    .bays-col { order: 0; }
+    .bays-col .col-header h2 { font-size: 16px; letter-spacing: 4px; }
+
+    .bay {
+      padding: 10px 12px 10px 18px;
+      grid-template-columns: 56px 1fr;
+      gap: 3px 10px;
+      min-height: 0;
+      flex: none;
+    }
+
+    .bay::before { width: 6px; }
+    .bay-id { font-size: 20px; letter-spacing: 1px; }
+    .bay-status { font-size: 10px; padding: 4px 8px; letter-spacing: 1.5px; }
+    .bay-photo { width: 56px; height: 56px; border-width: 2px; box-shadow: 0 0 10px rgba(200,212,0,0.2); }
+    .bay-turn-num { font-size: 18px; }
+    .bay-turn-num .t-prefix { margin-right: 2px; }
+    .bay-driver-name { font-size: 13px; }
+    .bay-tag { font-size: 10px; padding: 2px 7px; }
+    .bay-progress-bar { height: 6px; }
+    .bay-progress-meta { font-size: 10px; margin-top: 4px; }
+    .bay-progress-meta .time-left { font-size: 11px; }
+    .bay-empty-icon { width: 44px; height: 44px; }
+    .bay-empty-msg { font-size: 15px; letter-spacing: 2px; }
+    .bay-empty-sub { font-size: 10px; }
+
+    /* ─ Cola ─ */
+    .queue-col { order: 1; }
+    .col-header h2 { font-size: 16px; letter-spacing: 4px; }
+
+    .queue-item { padding: 8px 10px; gap: 8px; }
+    .queue-position { width: 40px; height: 40px; font-size: 20px; border-radius: 6px; }
+    .queue-turn { font-size: 18px; }
+    .queue-name { font-size: 12px; margin-top: 2px; }
+    .queue-tags { margin-top: 3px; }
+    .tag { font-size: 9px; padding: 1px 6px; }
+    .queue-eta { font-size: 10px; }
+    .queue-eta strong { font-size: 13px; }
+    .queue-item.next::after { font-size: 9px; padding: 2px 8px; top: -6px; }
+
+    /* ─ Footer ─ */
+    .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 10px 14px;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+    }
+
+    .stat { flex-direction: column; }
+    .stat-label { font-size: 9px; letter-spacing: 2px; }
+    .stat-value { font-size: 18px; }
+
+    .ticker { height: 24px; }
+    .ticker-label { font-size: 13px; padding: 3px 8px; margin-right: 10px; }
+    .ticker-content { font-size: 14px; letter-spacing: 1.5px; }
+
+    .system-status { display: none; }
+
+    /* ─ Alertas ─ */
+    .alert-photo { width: 100px; height: 100px; border-width: 4px; }
+    .alert-label { font-size: 18px; letter-spacing: 6px; }
+    .alert-title { font-size: 64px; letter-spacing: 2px; }
+    .alert-driver-name { font-size: 28px; letter-spacing: 2px; }
+    .alert-turn { font-size: 56px; padding: 12px 28px; letter-spacing: 4px; }
+    .alert-bay-target { font-size: 22px; letter-spacing: 3px; }
+
+    /* ─ Botones flotantes ─ */
+    #btn-audio-voz {
+      bottom: 8px;
+      right: 8px;
+      padding: 7px 12px;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      gap: 6px;
+    }
+
+    #live-status { bottom: 10px; left: 8px; font-size: 10px; }
+    #live-dot { width: 6px; height: 6px; }
+  }
+
 </style>
 </head>
 <body>
