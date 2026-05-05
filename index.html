@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>ARGOS · Sistema de Control de Despachos</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -296,6 +296,55 @@
     .bodega-card { padding: 28px 24px; }
     .bodega-name { font-size: 28px; }
   }
+
+  /* ═══════════════════════════════════════════════════
+     RESPONSIVE INDEX — TV · TABLET · SMARTPHONE
+     ═══════════════════════════════════════════════════ */
+
+  /* ── Tablet ── */
+  @media screen and (max-width: 1023px) and (min-width: 768px) {
+    .stage { padding: 30px 24px; }
+    .logo-text { font-size: 40px; }
+    .system-title { font-size: 24px; }
+    .bodegas-grid { gap: 20px; max-width: 680px; }
+    .bodega-card { padding: 28px 22px; }
+    .bodega-icon { width: 70px; height: 70px; }
+    .bodega-name { font-size: 28px; }
+  }
+
+  /* ── Smartphone ── */
+  @media screen and (max-width: 767px) {
+    .stage { padding: 24px 16px; justify-content: flex-start; }
+    .header { margin-bottom: 36px; }
+    .logo-circle { width: 44px; height: 44px; }
+    .logo-circle::before { width: 22px; height: 22px; }
+    .logo-text { font-size: 32px; letter-spacing: 4px; }
+    .logo-sub { font-size: 11px; letter-spacing: 6px; }
+    .logo-mark { gap: 10px; }
+    .system-title { font-size: 18px; letter-spacing: 3px; }
+    .system-subtitle { font-size: 11px; letter-spacing: 1.5px; }
+    .accent-line { width: 60px; height: 3px; margin-top: 14px; }
+
+    .selection-label { font-size: 11px; letter-spacing: 3px; margin-bottom: 22px; }
+    .selection-label::before, .selection-label::after { margin: 0 10px; }
+
+    .bodegas-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .bodega-card { padding: 24px 20px; border-radius: 12px; }
+    .bodega-card:hover { transform: translateY(-2px); }
+    .bodega-icon { width: 64px; height: 64px; margin-bottom: 14px; }
+    .bodega-name { font-size: 26px; letter-spacing: 3px; }
+    .bodega-info { font-size: 12px; margin-bottom: 12px; }
+    .bodega-bays-count { padding: 5px 14px; font-size: 11px; letter-spacing: 1.5px; margin-bottom: 14px; }
+    .bodega-cta { font-size: 14px; letter-spacing: 2px; }
+
+    .footer { margin-top: 40px; font-size: 10px; letter-spacing: 1.5px; }
+  }
+
 </style>
 </head>
 <body>
