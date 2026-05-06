@@ -222,11 +222,11 @@
 
   .bay-status {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    padding: 5px 12px;
-    border-radius: 4px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    padding: 10px 20px;
+    border-radius: 6px;
     text-transform: uppercase;
   }
   .status-free { background: rgba(46, 184, 114, 0.18); color: var(--argos-green); border: 1px solid rgba(46, 184, 114, 0.4); }
@@ -999,7 +999,7 @@
     .bay-photo { width: 62px; height: 62px; }
     .bay-turn-num { font-size: 20px; }
     .bay-driver-name { font-size: 13px; }
-    .bay-status { font-size: 11px; padding: 4px 10px; }
+    .bay-status { font-size: 22px; padding: 8px 16px; }
     .bay-progress-meta { font-size: 11px; }
 
     .center-col {
@@ -1163,7 +1163,7 @@
 
     .bay::before { width: 6px; }
     .bay-id { font-size: 20px; letter-spacing: 1px; }
-    .bay-status { font-size: 10px; padding: 4px 8px; letter-spacing: 1.5px; }
+    .bay-status { font-size: 18px; padding: 6px 12px; letter-spacing: 2px; }
     .bay-photo { width: 56px; height: 56px; border-width: 2px; box-shadow: 0 0 10px rgba(200,212,0,0.2); }
     .bay-turn-num { font-size: 18px; }
     .bay-turn-num .t-prefix { margin-right: 2px; }
@@ -1304,7 +1304,13 @@
     box-shadow: 0 2px 8px rgba(10,31,68,0.07);
   }
   .bays-col .bay-id { color: #0A1F44; }
-  .bays-col .bay-id .num-accent { color: #C8D400; }
+  .bays-col .bay-id .num-accent { 
+    color: #C8D400; 
+    -webkit-text-stroke: 1.5px #0A1F44;
+    text-stroke: 1.5px #0A1F44;
+    paint-order: stroke fill;
+    text-shadow: 0 0 1px #0A1F44, 1px 1px 0 #0A1F44, -1px -1px 0 #0A1F44, 1px -1px 0 #0A1F44, -1px 1px 0 #0A1F44;
+  }
   .bays-col .bay-turn-num { color: #0A1F44; }
   .bays-col .bay-turn-num .t-prefix { color: rgba(10,31,68,0.45); }
   .bays-col .bay-driver-name { color: #0A1F44; }
@@ -1396,7 +1402,7 @@
       <div class="video-area" id="video-area">
         <div class="video-corner-tag">VIDEO INSTITUCIONAL</div>
         <iframe id="yt-player"
-          src="https://www.youtube.com/embed/-klqBljKMQw?autoplay=1&mute=1&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3"
+          src="https://www.youtube.com/embed/-klqBljKMQw?autoplay=1&mute=1&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&enablejsapi=1&playsinline=1"
           style="position:absolute;inset:0;width:100%;height:100%;border:none;z-index:1;"
           allow="autoplay; encrypted-media" allowfullscreen>
         </iframe>
@@ -1890,7 +1896,7 @@ function toggleVideoVol() {
   // Recargar iframe con mute=0 o mute=1
   const mute = videoMuteado ? 1 : 0;
   const base = "https://www.youtube.com/embed/-klqBljKMQw";
-  const params = `?autoplay=1&mute=${mute}&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`;
+  const params = `?autoplay=1&mute=${mute}&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&enablejsapi=1&playsinline=1`;
   iframe.src = base + params;
 
   if (videoMuteado) {
@@ -1936,7 +1942,7 @@ function speak(text, voice, rate = 0.90, pitch = 1.05) {
   if (!videoMuteado) {
     const iframe = document.getElementById("yt-player");
     const base   = "https://www.youtube.com/embed/-klqBljKMQw";
-    iframe.src   = base + "?autoplay=1&mute=1&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&iv_load_policy=3";
+    iframe.src   = base + "?autoplay=1&mute=1&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1";
   }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
@@ -1951,7 +1957,7 @@ function speak(text, voice, rate = 0.90, pitch = 1.05) {
       setTimeout(() => {
         const iframe = document.getElementById("yt-player");
         const base   = "https://www.youtube.com/embed/-klqBljKMQw";
-        iframe.src   = base + "?autoplay=1&mute=0&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&iv_load_policy=3";
+        iframe.src   = base + "?autoplay=1&mute=0&loop=1&playlist=-klqBljKMQw&controls=0&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&playsinline=1";
       }, 500);
     }
   };
@@ -2233,6 +2239,121 @@ document.addEventListener('fullscreenchange', () => {
     <line x1="21" y1="3" x2="14" y2="10"/>
   </svg>
 </button>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     YOUTUBE IFRAME API: forzar autoplay del video institucional
+     (YouTube apretó políticas de autoplay; este bloque lo desbloquea)
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  // Cargar la API de YouTube
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var ytPlayer = null;
+  var playRetries = 0;
+  var MAX_RETRIES = 5;
+
+  // Callback obligatorio que YT ejecuta al cargar la API
+  window.onYouTubeIframeAPIReady = function() {
+    var iframe = document.getElementById('yt-player');
+    if (!iframe) return;
+    
+    ytPlayer = new YT.Player('yt-player', {
+      events: {
+        'onReady': function(event) {
+          event.target.mute();
+          event.target.playVideo();
+          // Reintento por si el primer playVideo no agarra
+          setTimeout(function() {
+            try {
+              if (event.target.getPlayerState() !== YT.PlayerState.PLAYING) {
+                event.target.mute();
+                event.target.playVideo();
+              }
+            } catch(e) {}
+          }, 1500);
+        },
+        'onStateChange': function(event) {
+          // Si quedó pausado o sin arrancar, forzar play (hasta MAX_RETRIES)
+          if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.UNSTARTED) {
+            if (playRetries < MAX_RETRIES) {
+              playRetries++;
+              setTimeout(function() {
+                try {
+                  ytPlayer.mute();
+                  ytPlayer.playVideo();
+                } catch(e) {}
+              }, 1000);
+            }
+          }
+          // Si terminó (no debería pasar con loop, pero por si acaso), reiniciar
+          if (event.data === YT.PlayerState.ENDED) {
+            try {
+              ytPlayer.seekTo(0);
+              ytPlayer.playVideo();
+            } catch(e) {}
+          }
+        },
+        'onError': function(event) {
+          // Si falla, recargar el iframe completo después de 5s
+          console.warn('YT error:', event.data, '- recargando iframe en 5s');
+          setTimeout(function() {
+            var f = document.getElementById('yt-player');
+            if (f) f.src = f.src;
+          }, 5000);
+        }
+      }
+    });
+  };
+
+  // Failsafe: si después de 8s el video no está reproduciéndose, recargar el iframe
+  setTimeout(function() {
+    if (!ytPlayer) return;
+    try {
+      var state = ytPlayer.getPlayerState();
+      if (state !== 1) {  // 1 = PLAYING
+        var f = document.getElementById('yt-player');
+        if (f) f.src = f.src;
+      }
+    } catch(e) {}
+  }, 8000);
+
+  // Hacer que toggleVideoVol use la API en vez de recargar el iframe
+  // (sobreescribe la función original si existe)
+  window._origToggleVideoVol = window.toggleVideoVol;
+  window.toggleVideoVol = function() {
+    if (!ytPlayer || typeof ytPlayer.isMuted !== 'function') {
+      // Si la API no está lista, usar el método antiguo
+      if (window._origToggleVideoVol) return window._origToggleVideoVol();
+      return;
+    }
+    try {
+      var label = document.getElementById('vol-label');
+      var ml1 = document.getElementById('vol-mute-line');
+      var ml2 = document.getElementById('vol-mute-line2');
+      
+      if (ytPlayer.isMuted()) {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(80);
+        if (label) label.textContent = 'CON AUDIO';
+        if (ml1) ml1.style.display = 'none';
+        if (ml2) ml2.style.display = 'none';
+      } else {
+        ytPlayer.mute();
+        if (label) label.textContent = 'SIN AUDIO';
+        if (ml1) ml1.style.display = '';
+        if (ml2) ml2.style.display = '';
+      }
+    } catch(e) {
+      console.warn('toggleVideoVol error:', e);
+    }
+  };
+})();
+</script>
 
 </body>
 </html>
