@@ -401,8 +401,8 @@
   /* ============ CENTER: NOW SERVING + VIDEO ============ */
   .center-col {
     display: grid;
-    grid-template-rows: auto 1fr;
-    gap: 22px;
+    grid-template-rows: 1fr;
+    gap: 0;
     min-height: 0;
   }
 
@@ -698,9 +698,16 @@
   .stat-value.white { color: var(--argos-white); }
 
   .ticker {
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     height: 90px;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-track {
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
     display: flex;
     align-items: center;
   }
@@ -729,7 +736,7 @@
   }
   .ticker-content span { margin-right: 120px; }
   @keyframes scroll {
-    from { transform: translateX(100vw); }
+    from { transform: translateX(100%); }
     to { transform: translateX(-100%); }
   }
 
@@ -1256,6 +1263,73 @@
     #btn-fullscreen { top: 80px; right: 10px; width: 32px; height: 32px; border-radius: 6px; }
   }
 
+
+  /* ─ Card now-serving eliminada ─ */
+  #now-serving-container { display: none !important; }
+
+  /* ══════════════════════════════════════════════════════
+     PANELES BLANCOS — BAHÍAS (izquierda) + COLA (derecha)
+     ══════════════════════════════════════════════════════ */
+  .bays-col,
+  .queue-col {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px 14px;
+    box-shadow: 0 4px 24px rgba(10,31,68,0.18);
+  }
+  .bays-col .col-header,
+  .queue-col .col-header {
+    border-bottom: 2px solid rgba(10,31,68,0.15);
+  }
+  .bays-col .col-header h2,
+  .queue-col .col-header h2 {
+    color: #0A1F44;
+  }
+  .bays-col .col-header .accent,
+  .queue-col .col-header .accent {
+    background: #C8D400;
+  }
+  .bays-col .bay {
+    background: #eef2f9;
+    border: 1px solid rgba(10,31,68,0.12);
+    box-shadow: 0 2px 8px rgba(10,31,68,0.07);
+  }
+  .bays-col .bay-id { color: #0A1F44; }
+  .bays-col .bay-id .num-accent { color: #C8D400; }
+  .bays-col .bay-turn-num { color: #0A1F44; }
+  .bays-col .bay-turn-num .t-prefix { color: rgba(10,31,68,0.45); }
+  .bays-col .bay-driver-name { color: #0A1F44; }
+  .bays-col .bay-progress-meta { color: rgba(10,31,68,0.55); }
+  .bays-col .bay-progress-meta .time-left { color: #0A1F44; font-weight: 700; }
+  .bays-col .bay-progress-bar { background: rgba(10,31,68,0.10); }
+  .bays-col .bay-empty-msg { color: rgba(10,31,68,0.45); }
+  .bays-col .bay-empty-sub { color: rgba(10,31,68,0.35); }
+  .bays-col .bay-tag { background: rgba(10,31,68,0.08); color: #0A1F44; border-color: rgba(10,31,68,0.15); }
+
+  .queue-col .queue-item {
+    background: #eef2f9;
+    border: 1px solid rgba(10,31,68,0.12);
+    box-shadow: 0 2px 8px rgba(10,31,68,0.06);
+  }
+  .queue-col .queue-item.next {
+    background: linear-gradient(90deg, rgba(200,212,0,0.18) 0%, #e8eef8 100%);
+    border-color: #C8D400;
+    box-shadow: 0 0 18px rgba(200,212,0,0.18);
+  }
+  .queue-col .queue-position {
+    background: #0A1F44;
+    border-color: rgba(200,212,0,0.7);
+    color: #ffffff;
+  }
+  .queue-col .queue-turn { color: #0A1F44; }
+  .queue-col .queue-name { color: rgba(10,31,68,0.70); }
+  .queue-col .queue-eta { color: rgba(10,31,68,0.50); }
+  .queue-col .queue-eta strong { color: #0A1F44; }
+  .queue-col .tag { background: rgba(10,31,68,0.08); color: #0A1F44; border: 1px solid rgba(10,31,68,0.15); }
+
+  /* Sin pilotos en cola: texto azul suave */
+  .queue-col i, .queue-col em { color: rgba(10,31,68,0.40) !important; }
+
 </style>
 </head>
 <body>
@@ -1381,12 +1455,14 @@
     
     <div class="ticker">
       <div class="ticker-label">AVISO</div>
+      <div class="ticker-track">
       <div class="ticker-content">
         <span>▸ Recuerde portar su equipo de protección personal en todo momento.</span>
         <span>▸ Velocidad máxima dentro de planta: 20 km/h.</span>
         <span>▸ Apague el motor durante la carga / descarga.</span>
         <span>▸ ARGOS · Construyendo confianza desde 1934.</span>
       </div>
+      </div><!-- /ticker-track -->
     </div>
 
     <div class="system-status">
