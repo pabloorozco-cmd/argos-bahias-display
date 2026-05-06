@@ -58,16 +58,19 @@
   .stage {
     position: relative;
     width: 100%;
+    max-width: 100vw;
     height: 100vh;
     display: grid;
     grid-template-rows: 130px 1fr 156px;
+    grid-template-columns: 100%;
     z-index: 1;
+    overflow: hidden;
   }
 
   /* ============ HEADER ============ */
   .header {
     display: grid;
-    grid-template-columns: 460px 1fr 360px;
+    grid-template-columns: 460px minmax(0, 1fr) 360px;
     align-items: center;
     padding: 0 36px;
     background: linear-gradient(180deg, rgba(6, 21, 48, 0.95) 0%, rgba(10, 31, 68, 0.7) 100%);
@@ -147,7 +150,7 @@
   /* ============ MAIN GRID ============ */
   .main {
     display: grid;
-    grid-template-columns: 420px 1fr 400px;
+    grid-template-columns: 420px minmax(0, 1fr) 400px;
     gap: 22px;
     padding: 22px 28px;
     overflow: hidden;
@@ -883,14 +886,14 @@
 
   /* ── Ultra-wide / 4K TV (>= 1800px) ─────────────────── */
   @media screen and (min-width: 1800px) {
-    .header { grid-template-columns: 540px 1fr 480px; }
+    .header { grid-template-columns: 540px minmax(0, 1fr) 480px; }
     .logo-img { height: 140px; max-width: 460px; }
     .logo-sep { height: 80px; }
     .logo-sub { font-size: 28px; letter-spacing: 6px; }
     .logo-text { font-size: 42px; letter-spacing: 9px; }
     .clock { font-size: 44px; }
     .header-center .title { font-size: 34px; }
-    .main { padding: 28px 36px; gap: 28px; grid-template-columns: 500px 1fr 460px; }
+    .main { padding: 28px 36px; gap: 28px; grid-template-columns: 500px minmax(0, 1fr) 460px; }
     .bay { padding: 20px 22px 20px 30px; }
     .bay-id { font-size: 36px; }
     .bay-turn-num { font-size: 32px; }
@@ -907,8 +910,8 @@
   /* ── Standard HD TV / Large monitor (1024px – 1799px) ── */
   /* (estilos base ya optimizados para este rango) */
   @media screen and (min-width: 1024px) and (max-width: 1399px) {
-    .main { grid-template-columns: 350px 1fr 320px; gap: 18px; padding: 18px 22px; }
-    .header { grid-template-columns: 380px 1fr 320px; padding: 0 28px; }
+    .main { grid-template-columns: 350px minmax(0, 1fr) 320px; gap: 18px; padding: 18px 22px; }
+    .header { grid-template-columns: 380px minmax(0, 1fr) 320px; padding: 0 28px; }
     .logo-img { height: 90px; max-width: 320px; }
     .logo-sep { height: 50px; }
     .logo-sub { font-size: 18px; letter-spacing: 4px; }
