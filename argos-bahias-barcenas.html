@@ -60,7 +60,7 @@
     width: 100%;
     height: 100vh;
     display: grid;
-    grid-template-rows: 80px 1fr 70px;
+    grid-template-rows: 80px 1fr 156px;
     z-index: 1;
   }
 
@@ -235,7 +235,7 @@
   /* Photo + info row */
   .bay-photo {
     grid-column: 1;
-    grid-row: 2 / 4;
+    grid-row: 3;
     width: 76px;
     height: 76px;
     border-radius: 50%;
@@ -301,7 +301,8 @@
   /* Progress bar - thicker */
   .bay-progress {
     grid-column: 1 / -1;
-    margin-top: 8px;
+    grid-row: 4;
+    margin-top: 6px;
   }
   .bay-progress-bar {
     height: 9px;
@@ -401,8 +402,8 @@
   /* ============ CENTER: NOW SERVING + VIDEO ============ */
   .center-col {
     display: grid;
-    grid-template-rows: auto 1fr;
-    gap: 22px;
+    grid-template-rows: 1fr;
+    gap: 0;
     min-height: 0;
   }
 
@@ -673,24 +674,24 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 32px;
-    padding: 0 32px;
-    background: linear-gradient(180deg, rgba(10, 31, 68, 0.7) 0%, rgba(6, 21, 48, 0.95) 100%);
-    border-top: 1px solid rgba(200, 212, 0, 0.25);
+    gap: 40px;
+    padding: 0 40px;
+    background: linear-gradient(180deg, rgba(10, 31, 68, 0.7) 0%, rgba(6, 21, 48, 0.98) 100%);
+    border-top: 2px solid rgba(200, 212, 0, 0.35);
   }
 
-  .stats { display: flex; gap: 32px; }
+  .stats { display: flex; gap: 48px; }
   .stat { display: flex; flex-direction: column; }
   .stat-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2.5px;
+    font-size: 22px;
+    letter-spacing: 3px;
     color: var(--argos-gray);
     text-transform: uppercase;
   }
   .stat-value {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 26px;
+    font-size: 64px;
     font-weight: 800;
     color: var(--argos-lime);
     line-height: 1;
@@ -698,34 +699,45 @@
   .stat-value.white { color: var(--argos-white); }
 
   .ticker {
-    overflow: hidden;
+    overflow: visible;
     position: relative;
-    height: 30px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-track {
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
     display: flex;
     align-items: center;
   }
   .ticker-label {
     background: var(--argos-lime);
     color: var(--argos-navy-deep);
-    padding: 5px 12px;
+    padding: 12px 28px;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800;
-    font-size: 12px;
-    letter-spacing: 2.5px;
-    margin-right: 18px;
+    font-size: 52px;
+    letter-spacing: 5px;
+    margin-right: 28px;
     flex-shrink: 0;
-    border-radius: 3px;
+    border-radius: 6px;
+    white-space: nowrap;
   }
   .ticker-content {
     white-space: nowrap;
-    animation: scroll 40s linear infinite;
-    font-size: 14px;
-    color: rgba(255,255,255,0.85);
-    font-weight: 500;
+    animation: scroll 60s linear infinite;
+    font-size: 64px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.95);
+    position: relative;
   }
-  .ticker-content span { margin-right: 60px; }
+  .ticker-content span { margin-right: 120px; }
   @keyframes scroll {
-    from { transform: translateX(100%); }
+    from { transform: translateX(100vw); }
     to { transform: translateX(-100%); }
   }
 
@@ -883,8 +895,8 @@
     .queue-turn { font-size: 30px; }
     .queue-name { font-size: 16px; }
     .footer { padding: 0 40px; }
-    .stat-value { font-size: 30px; }
-    .ticker-content { font-size: 26px; }
+    .stat-value { font-size: 72px; }
+    .ticker-content { font-size: 72px; }
   }
 
   /* ── Standard HD TV / Large monitor (1024px – 1799px) ── */
@@ -909,11 +921,11 @@
     .queue-turn { font-size: 20px; }
     .queue-name { font-size: 13px; }
     .queue-position { width: 44px; height: 44px; font-size: 22px; }
-    .stat-value { font-size: 22px; }
-    .ticker-content { font-size: 19px; }
+    .stat-value { font-size: 56px; }
+    .ticker-content { font-size: 56px; }
     .footer { grid-template-columns: auto 1fr auto; gap: 20px; padding: 0 24px; }
     .stats { gap: 20px; }
-    .stage { grid-template-rows: 70px 1fr 48px; }
+    .stage { grid-template-rows: 70px 1fr 156px; }
   }
 
   /* ── Tablet landscape (768px – 1023px) ────────────────── */
@@ -1015,8 +1027,8 @@
     .stats { gap: 14px; }
     .stat-value { font-size: 20px; }
     .stat-label { font-size: 10px; letter-spacing: 2px; }
-    .ticker-label { font-size: 16px; padding: 4px 10px; }
-    .ticker-content { font-size: 17px; }
+    .ticker-label { font-size: 28px; padding: 7px 18px; }
+    .ticker-content { font-size: 38px; }
 
     .alert-title { font-size: 80px; }
     .alert-turn { font-size: 64px; padding: 14px 36px; }
@@ -1213,7 +1225,7 @@
   /* ── Botón Pantalla Completa ────────────────────────── */
   #btn-fullscreen {
     position: fixed;
-    top: 14px;
+    top: 90px;
     right: 14px;
     z-index: 500;
     display: flex;
@@ -1221,27 +1233,140 @@
     justify-content: center;
     width: 38px;
     height: 38px;
-    background: rgba(6,21,48,0.82);
-    border: 1px solid rgba(200,212,0,0.45);
+    background: rgba(6,21,48,0.85);
+    border: 1.5px solid rgba(245,200,66,0.7);
     border-radius: 8px;
     cursor: pointer;
-    color: var(--argos-lime);
+    color: var(--argos-gold);
     backdrop-filter: blur(6px);
     box-shadow: 0 4px 14px rgba(0,0,0,0.4);
     transition: all 0.2s ease;
     padding: 0;
   }
   #btn-fullscreen:hover {
-    border-color: var(--argos-lime);
-    box-shadow: 0 0 16px rgba(200,212,0,0.35);
+    border-color: var(--argos-gold);
+    box-shadow: 0 0 18px rgba(245,200,66,0.5);
     transform: scale(1.08);
-    background: rgba(10,31,68,0.9);
+    background: rgba(10,31,68,0.95);
   }
   #btn-fullscreen svg { display: block; }
 
   @media screen and (max-width: 767px) {
-    #btn-fullscreen { top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 6px; }
+    #btn-fullscreen { top: 80px; right: 10px; width: 32px; height: 32px; border-radius: 6px; }
   }
+
+
+  /* ─ Now-serving card eliminada ─ */
+  #now-serving-container { display: none !important; }
+
+  /* ══════════════════════════════════════════════════════
+     PANELES BLANCOS — BAHÍAS (izquierda) + COLA (derecha)
+     ══════════════════════════════════════════════════════ */
+  .bays-col,
+  .queue-col {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px 14px;
+    box-shadow: 0 4px 24px rgba(10,31,68,0.18);
+  }
+  .bays-col .col-header,
+  .queue-col .col-header {
+    border-bottom: 2px solid rgba(10,31,68,0.15);
+  }
+  .bays-col .col-header h2,
+  .queue-col .col-header h2 { color: #0A1F44; }
+  .bays-col .col-header .accent,
+  .queue-col .col-header .accent { background: #C8D400; }
+
+  .bays-col .bay {
+    background: #eef2f9;
+    border: 1px solid rgba(10,31,68,0.12);
+    box-shadow: 0 2px 8px rgba(10,31,68,0.07);
+  }
+  .bays-col .bay-id    { color: #0A1F44; }
+  .bays-col .bay-id .num-accent { color: #C8D400; }
+  .bays-col .bay-turn-num { color: #0A1F44; }
+  .bays-col .bay-turn-num .t-prefix { color: rgba(10,31,68,0.45); }
+  .bays-col .bay-driver-name { color: #0A1F44; }
+  .bays-col .bay-progress-bar { background: rgba(10,31,68,0.10); }
+  .bays-col .bay-empty-msg { color: rgba(10,31,68,0.45); }
+  .bays-col .bay-empty-sub { color: rgba(10,31,68,0.35); }
+  .bays-col .bay-tag { background: rgba(10,31,68,0.08); color: #0A1F44; border-color: rgba(10,31,68,0.15); }
+
+  .queue-col .queue-item {
+    background: #eef2f9;
+    border: 1px solid rgba(10,31,68,0.12);
+    box-shadow: 0 2px 8px rgba(10,31,68,0.06);
+  }
+  .queue-col .queue-item.next {
+    background: linear-gradient(90deg, rgba(200,212,0,0.18) 0%, #e8eef8 100%);
+    border-color: #C8D400;
+    box-shadow: 0 0 18px rgba(200,212,0,0.18);
+  }
+  .queue-col .queue-position { background: #0A1F44; border-color: rgba(200,212,0,0.7); color: #ffffff; }
+  .queue-col .queue-turn  { color: #0A1F44; }
+  .queue-col .queue-name  { color: rgba(10,31,68,0.70); }
+  .queue-col .queue-eta   { color: rgba(10,31,68,0.50); }
+  .queue-col .queue-eta strong { color: #0A1F44; }
+  .queue-col .tag { background: rgba(10,31,68,0.08); color: #0A1F44; border: 1px solid rgba(10,31,68,0.15); }
+  .queue-col i, .queue-col em { color: rgba(10,31,68,0.40) !important; }
+
+  /* ─── Bay card: status-bar prominente ─── */
+  .bay-status-bar {
+    grid-column: 1 / -1;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+  .bays-col .bay-status-bar { font-size: 24px; }
+
+  .bay-status-bar.status-free { background: rgba(46,184,114,0.18); color: #2EB872; border: 1.5px solid rgba(46,184,114,0.5); }
+  .bay-status-bar.status-busy { background: rgba(230,57,70,0.15); color: #FF4D58; border: 1.5px solid rgba(230,57,70,0.5); }
+  .bay-status-bar.status-warn { background: rgba(245,200,66,0.20); color: #F5C842; border: 1.5px solid rgba(245,200,66,0.6); }
+
+  .bays-col .bay-status-bar.status-free { background: rgba(46,184,114,0.12); color: #1a9e5c; border-color: rgba(46,184,114,0.4); }
+  .bays-col .bay-status-bar.status-busy { background: rgba(230,57,70,0.10); color: #cc2233; border-color: rgba(230,57,70,0.35); }
+  .bays-col .bay-status-bar.status-warn { background: rgba(245,200,66,0.15); color: #c48a00; border-color: rgba(245,200,66,0.5); }
+
+  /* ─── Placa ─── */
+  .bay-placa-row {
+    display: flex; align-items: baseline; gap: 8px; margin-top: 5px;
+  }
+  .bay-placa-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.5); text-transform: uppercase; flex-shrink: 0;
+  }
+  .bay-placa-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px; font-weight: 700;
+    color: var(--argos-lime); letter-spacing: 3px;
+  }
+  .bays-col .bay-placa-label { color: rgba(10,31,68,0.5); }
+  .bays-col .bay-placa-val   { color: #0A5CBA; }
+
+  /* ─── Hora de llegada ─── */
+  .bay-llegada-row {
+    display: flex; align-items: baseline; gap: 8px; margin-top: 3px;
+  }
+  .bay-llegada-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.5); text-transform: uppercase; flex-shrink: 0;
+  }
+  .bay-llegada-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px; font-weight: 600;
+    color: rgba(255,255,255,0.80); letter-spacing: 2px;
+  }
+  .bays-col .bay-llegada-label { color: rgba(10,31,68,0.45); }
+  .bays-col .bay-llegada-val   { color: rgba(10,31,68,0.75); }
 
 </style>
 </head>
@@ -1340,12 +1465,14 @@
     
     <div class="ticker">
       <div class="ticker-label">AVISO</div>
+      <div class="ticker-track">
       <div class="ticker-content">
         <span>▸ Recuerde portar su equipo de protección personal en todo momento.</span>
         <span>▸ Velocidad máxima dentro de planta: 20 km/h.</span>
         <span>▸ Apague el motor durante la carga / descarga.</span>
         <span>▸ ARGOS · Construyendo confianza desde 1934.</span>
       </div>
+      </div><!-- /ticker-track -->
     </div>
 
     <div class="system-status">
@@ -1557,26 +1684,26 @@ function renderBahias(turnosActivos, fotosMap, prefijoBahia) {
       <div class="bay ${badge.cls}">
         <div class="bay-top">
           <div class="bay-id">${prefijoBahia}<span class="num-accent">${bayNum}</span></div>
-          <div class="bay-status ${statusClass}">${badge.label}</div>
+          ${tipoTag(t.tipo_piloto)}
         </div>
+        <div class="bay-status-bar ${statusClass}">${badge.label}</div>
         <div class="bay-photo">
           ${fotoHtml}
-        </div>
-        <div class="bay-meta">
-          <div class="bay-tags">
-            ${tipoTag(t.tipo_piloto)}
-          </div>
         </div>
         <div class="bay-driver">
           <div class="bay-turn-num"><span class="t-prefix">T</span>${t.turno_numero || "?"}</div>
           <div class="bay-driver-name">${t.piloto_nombre || "—"}</div>
+          <div class="bay-placa-row">
+            <span class="bay-placa-label">PLACA</span>
+            <span class="bay-placa-val">${t.piloto_placa || "—"}</span>
+          </div>
+          <div class="bay-llegada-row">
+            <span class="bay-llegada-label">LLEGÓ</span>
+            <span class="bay-llegada-val">${t.hora_llegada || "—"}</span>
+          </div>
         </div>
         <div class="bay-progress">
           <div class="bay-progress-bar"><div class="bay-progress-fill" style="width: ${progresoFill(t.status)}%"></div></div>
-          <div class="bay-progress-meta">
-            <span>🚗 ${t.piloto_placa || "—"}</span>
-            <span class="time-left">▸ ${t.hora_llegada || ""}</span>
-          </div>
         </div>
       </div>`);
   }
